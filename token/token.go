@@ -10,6 +10,7 @@ type Token struct {
 
 const (
     EOF = "EOF"
+    NEWL = "\n"
 
     NAME = "NAME"
     INT = "INT"

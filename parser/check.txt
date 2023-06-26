@@ -1,0 +1,80 @@
++ Calculus	Exam	152	72	6	6	4	Satisfactory	0	15-06-2020	
++ Discrete Mathematics	Exam	266	108	8	8	8	Excellent	0	19-06-2020	
++ Economics	Exam	152	80	4	4	7	Good	0	18-06-2020	
++ English Language Integrative Exam *	Exam	0	0	4	4	9	Excellent	0	30-06-2020	Сдано в другом ВУЗе
++ Physical Training	Pass-fail test	200	144	0	0		Passed	0	30-06-2020	
++ Programming	Exam	266	84	8	8	4	Satisfactory	0	25-06-2020	
++ Theoretical Informatics	Exam	190	76	6	6	7	Good	0	23-06-2020	
++ Проект Продвижение образовательной программы в социальной сети Вконтакте *	Exam			3	0	10	Excellent	0	30-06-2020	
++ Проект Проект по дисциплине "Программирование" *	Exam			3	0	7	Good	0	30-06-2020	Попов Д.А.
+
++ Project Seminar	Exam	190	72	3	3	5	Satisfactory	0	16-06-2020	
+
++ Algebra and Geometry	Exam	228	80	6	6	5	Satisfactory	0	23-12-2019	
++ Calculus	Exam	152	56	2	2	4	Satisfactory	0	11-02-2020	
+English Language	Exam	608	270	4	0	8	Excellent	0	17-06-2020	
++ Information Processes, Systems and Networks	Exam	114	30	4	4	5	Satisfactory	0	30-10-2020	
+
++ History	Exam	152	64	4	4	5	Satisfactory	0	23-01-2020 +	
++ Philosophy	Exam	152	68	4	4	8	Excellent	0	24-12-2019	
++ Safe Living Basics	Exam	38	18	1	1	10	Excellent	0	21-10-2019 +
++ Databases	Exam	190	50	4	4	8	Excellent	0	30-06-2021	
++ Law	Exam	152	80	4	4	9	Excellent	0	27-12-2019	
++ Macroeconomics *	Exam	114	44	3	3	8	Excellent	0	19-11-2021	Сдано в другом ВУЗе
++ Management: Concepts and Technologies of the 21st Century	Exam	152	40	4	4	7	Good	0	23-01-2021	
+Operations Research *	Exam	114	48	3	3		-	0	-	
++ Physical Training	Pass-fail test	200	144	1	1		Passed	0	21-06-2021	
+
++ Probabilistic and Statistical Management Models	Exam	190	50	4	4	4	Satisfactory	0	26-12-2020	
+
++ Financial and Managerial Accounting	Exam	228	60	4	4	8	Excellent	0	28-12-2020	
++ IT Project Management *	Exam	114	2	3	3	10	Excellent	0	13-04-2023	Сдано в другом ВУЗе
++ Programming	Exam	152	40	3	3	5	Satisfactory	0	31-12-2020
++ Digital Product Development *	Exam	114	30	3	3	7	Good	0	30-06-2022	Е.В. Соколов
++ Financial Management *	Exam	152	48	4	4	9	Excellent	0	27-06-2022	Д.С. Сизых
++ Foundations of machine learning *	Exam	190	80	5	5	9	Excellent	0	22-06-2022	В.М. Альперович, Е.А. Соколов
++ Introduction to Machine Learning *	Exam	114	24	3	3	9	Excellent	0	25-06-2022	А.В. Пащенко
++ IT Infrastructure for Business *	Exam	114	36	3	3	9	Excellent	0	21-06-2022	П.А. Тарасов, В.А. Самодуров
++ Quantitative Methods for Management Decisions *	Exam	152	40	4	4	8	Excellent	0	21-06-2022	С.С. Демин
++ Strategic Management *	Exam	152	40	4	4	6	Good	0	20-06-2022	Е.Д. Бурда, И.О. Волкова
++ Курсовая работа *
++ Designing the Data Structure for a Database of Commercial Bank Customers’ Plastic Cards	Exam	114	2	3	3	9	Excellent	0	30-06-2022	
++ Курсовой проект *
++ Development of a Recommender System for the FarFetch Marketplace	Exam	152	2	4	4	9	Excellent	0	30-06-2022	С.Н. Брускин
+
++ Business Communications	Exam	152	40	4	4	9	Excellent	0	30-06-2021	
++ Financial Planning and Budgeting Systems *	Exam	114	30	3	3	8	Excellent	0	28-03-2022	Д.В. Исаев
++ Information Systems Implementation Management *	Exam	190	50	5	5	10	Excellent	0	01-04-2022	П.А. Тарасов, Н.А. Филатов, А.Ф. Моргунов, Н.С. Казанцев
++ Project Seminar *	Exam	190	72	3	3	5	Satisfactory	0	16-06-2020	
++ Project Seminar "Modeling of Organization" *	Exam	114	30	3	3	6	Good	0	29-03-2022	Я.В. Горчаков
++ Проект Нейробиологические основы этики и добропорядочности *	Exam			4	0	10	Excellent	0	16-03-2022	
+
++ Business Process Modelling *	Exam	114	30	3	3	6	Good	0	29-12-2021	
++ Data Warehouse *	Exam	152	40	4	4	8	Excellent	0	21-12-2021	К.С. Гоменюк
++ Enterprise Architecture *	Exam	190	50	5	5	8	Excellent	0	20-12-2021	Е.П. Зараменских
++ Introduction to Programming *	Exam	190	50	5	5	7	Good	0	22-12-2021	Д.П. Семенов
++ Supply Chain Management *	Exam	152	40	4	4	7	Good	0	24-12-2021	М.В. Ермолина
+
++ Independent English Exam *	Exam	2	3	4	4	9	Excellent	0	16-09-2021	Сдано в другом ВУЗе
++ Requirements Management and IS Design *	Exam	152	40	4	4	9	Excellent	0	19-10-2021	И.А. Никитин
++ Applied Data Analysis Problems *	Exam	190	72	5	5	10	Excellent	0	24-04-2023	Е.А. Соколов
++ Защита выпускной квалификационной работы
++ Designing a Microservice Architecture for Companies in Fintech Industry	Exam	114	2	3	3	8	Excellent	0	19-06-2023	
++ Преддипломная практика *	Exam	304	2	8	8	8	Excellent	0	24-05-2023	
+
++ Analysis and Forecasting of Heterogeneous Time Series *	Exam	152	40	4	4	8	Excellent	0	30-03-2023	А.А. Макаров
++ Design Thinking Basics *	Exam	114	30	3	3	8	Excellent	0	02-04-2023	Н.Н. Прохорова
++ E-Business Business Models *	Exam	152	40	4	4	9	Excellent	0	31-03-2023	Л.В. Булавкина
++ Economics of Information Systems *	Exam	114	30	3	3	9	Excellent	0	31-03-2023	Е.А. Деева
++ ESG: Sustainable Development Thinking *	Exam	114	30	3	3	7	Good	0	02-04-2023	Ю.В. Тимофеев
++ Project Proposal *	Exam		2	2	2	10	Excellent	0	21-03-2023	М.А. Волкова
++ Проект Влияние санкций на теневую экономику и коррупцию *	Exam			4	0	9	Excellent	0	23-12-2022	
+
++ Introduction to Deep Learning *	Exam	190	60	5	5	9	Excellent	0	21-12-2022	Е.А. Соколов
++ IT Project Management *	Exam	190	50	5	5		-	0	-	
++ Organisational Behaviour and Human Resource Management *	Exam	152	60	4	4	8	Excellent	0	23-12-2022	Е.В. Логачева
++ Research Seminar "Management of Information Systems" *	Exam	152	40	4	4	9	Excellent	0	28-12-2022	Ю.А. Зеленков
++ Technological Entrepreneurship *	Exam	152	40	4	4	9	Excellent	0	26-12-2022	Ж.-. Текич
+
++ Introduction to Information Security *	Exam	114	28	3	3	7	Good	0	29-10-2022	А.А. Внуков
++ Учебная практика *	Exam	114	2	3	3	7	Good	0	09-09-2022	

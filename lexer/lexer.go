@@ -117,6 +117,8 @@ func (l *Lexer) NextToken() token.Token {
         tok = newToken(token.COMMA, l.ch)
     case ':':
         tok = newToken(token.COLON, l.ch)
+    case '\n':
+        tok = newToken(token.NEWL, l.ch)
     case 0:
         tok.Literal = ""
         tok.Type = token.EOF
@@ -175,7 +177,7 @@ func isDigit(ch byte) bool {
 }
 
 func (l *Lexer) omitSymbol() {
-    for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+    for l.ch == ' ' || l.ch == '\t' || l.ch == '\r' {
         l.nextChar()
     }
 }
