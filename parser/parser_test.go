@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"fmt"
+//	"fmt"
 	"testing"
 
 	"mxshs/pyinterpreter/ast"
@@ -10,15 +10,15 @@ import (
 
 func TestAssignmentStatements(t *testing.T) {
     input := `
-    a = 3
-    b = 5
-    cd = 3535
+    a 3
+    b =
+    cd 3535
     `
 
     l := lexer.GetLexer(input)
     p := GetParser(l)
     program := p.ParseProgram()
-    
+    testParserErrors(t, p)    
 
     tests := []struct {
         expectedName string
@@ -30,11 +30,25 @@ func TestAssignmentStatements(t *testing.T) {
 
     for i, tt := range tests {
         statement := program.Statements[i]
-        fmt.Printf(statement.TokenLiteral())
+        // fmt.Printf(statement.TokenLiteral())
         if !testAssignmentStatement(t, statement, tt.expectedName) {
             return
         }
     }
+}
+
+func testParserErrors(t *testing.T, p *Parser) {
+    errors := p.Errors()
+
+    if len(errors) == 0 {
+        return
+    }
+
+    for _, msg := range errors {
+        t.Errorf("Parser error: %q:", msg)
+    }
+
+    t.FailNow()
 }
 
 func testAssignmentStatement(t *testing.T, s ast.Statement, name string) bool {
@@ -61,3 +75,4 @@ func testAssignmentStatement(t *testing.T, s ast.Statement, name string) bool {
 
     return true
 }
+
