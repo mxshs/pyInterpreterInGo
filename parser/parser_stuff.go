@@ -9,7 +9,7 @@ import (
 )
 
 func Run() {
-    input := "foo"
+    input := "35"
     l := lexer.GetLexer(input)
     p := GetParser(l)
     program := p.ParseProgram()
@@ -20,11 +20,11 @@ func Run() {
             fmt.Printf("wrong type, got: %T", s)
         }
 
-        ident, ok := stmt.Expression.(*ast.Name)
+        ident, ok := stmt.Expression.(*ast.IntegerLiteral)
         if !ok {
             fmt.Printf("wrong exp type, got: %T", stmt.Expression)
         }
-        fmt.Printf("%s %s", ident.Value, ident.TokenLiteral())
+        fmt.Printf("%d %s", ident.Value, ident.TokenLiteral())
         // fmt.Printf("%s %s %s", s.String(), s.TokenLiteral(), program.Statements[0])
     }
 }

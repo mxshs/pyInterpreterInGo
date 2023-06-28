@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 
 	"mxshs/pyinterpreter/ast"
 	"mxshs/pyinterpreter/lexer"
@@ -43,6 +44,7 @@ func GetParser(l *lexer.Lexer) *Parser {
 
     p.prefixParsers = make(map[token.TokenType]prefixParse)
     p.registerPrefix(token.NAME, p.parseName)
+    p.registerPrefix(token.INT, p.parseIntegerLiteral)
 
     p.nextToken()
     p.nextToken()
@@ -128,6 +130,21 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 func (p *Parser) parseName() ast.Expression {
     return &ast.Name{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+    literal := &ast.IntegerLiteral{Token: p.curToken}
+
+    value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+    if err != nil {
+        msg := fmt.Sprintf("error during parsing %q as integer", p.curToken.Literal)
+        p.errors = append(p.errors, msg)
+        return nil
+    }
+
+    literal.Value = value
+
+    return literal
 }
 
 func (p *Parser) tokenIs (t token.TokenType) bool {
