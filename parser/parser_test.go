@@ -1,7 +1,8 @@
 package parser
 
 import (
-//	"fmt"
+	//	"fmt"
+	"fmt"
 	"testing"
 
 	"mxshs/pyinterpreter/ast"
@@ -34,6 +35,57 @@ func TestAssignmentStatements(t *testing.T) {
         if !testAssignmentStatement(t, statement, tt.expectedName) {
             return
         }
+    }
+}
+
+func TestInfixExpressions(t * testing.T) {
+    infixTests := []struct {
+        input string
+        leftValue int64
+        operator string
+        rightValue int64
+    }{
+        {"3 + 5", 3, "+", 5},
+        {"69 - 420", 69, "-", 420},
+        {"420 * 69", 420, "*", 69},
+        {"6 / 9", 6, "/", 9},
+        {"9 < 6", 9, "<", 6},
+        {"6 > 9", 6, ">", 9},
+        {"4 == 20", 4, "==", 20},
+        {"20 != 4", 20, "!=", 4},
+        {"4 ** 20", 4, "**", 20},
+    }
+
+    for _, tt := range infixTests {
+        l := lexer.GetLexer(tt.input)
+        p := GetParser(l)
+        program := p.ParseProgram()
+        testParserErrors(t, p)
+
+        if len(program.Statements) != 1 {
+            t.Fatalf("statements length expected to be: %d, got: %d",
+                        1,
+                        len(program.Statements))
+        }
+        statement, ok := program.Statements[0].(*ast.ExpressionStatement)
+        if !ok {
+            t.Fatalf("statement expected to be of type: ExpressionStatement, got: %T",
+                        program.Statements[0])
+        }
+
+        expression, ok := statement.Expression.(*ast.InfixExpression)
+        if !ok {
+            t.Fatalf("expression expected to be of type: InfixExpression, got: %T",
+                        statement.Expression)
+        }
+
+        if expression.Operator != tt.operator {
+            t.Fatalf("expression operator expected to be: %s, got: %s",
+                        tt.operator,
+                        expression.Operator)
+        }
+
+        fmt.Printf("expression: %s", expression)
     }
 }
 
