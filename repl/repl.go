@@ -4,8 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"reflect"
+	//"reflect"
 
+	"mxshs/pyinterpreter/eval"
 	"mxshs/pyinterpreter/lexer"
 	"mxshs/pyinterpreter/parser"
 	//"mxshs/pyinterpreter/token"
@@ -17,7 +18,7 @@ func StartREPL(in io.Reader, out io.Writer) {
     scanner := bufio.NewScanner(in)
 
     for {
-        fmt.Printf(PROMPT)
+        fmt.Print(PROMPT)
 
         scanned := scanner.Scan()
         if !scanned {
@@ -26,8 +27,8 @@ func StartREPL(in io.Reader, out io.Writer) {
 
         line := scanner.Text()
         l := lexer.GetLexer(line)
+        
         p := parser.GetParser(l)
-
         program := p.ParseProgram()
 
         if len(p.Errors()) != 0 {
@@ -37,9 +38,11 @@ func StartREPL(in io.Reader, out io.Writer) {
             continue
         }
 
-        for _, s := range program.Statements {
-            io.WriteString(out, s.String() + "\n")
-            io.WriteString(out, reflect.TypeOf(s).String() + "\n")
+        evaluated := eval.Eval(program)
+
+        if evaluated != nil {
+            io.WriteString(out, evaluated.Inspect())
+            io.WriteString(out, "\n")
         }
 //        for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
 //            fmt.Printf("%+v\n", tok)
