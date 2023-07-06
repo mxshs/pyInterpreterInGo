@@ -16,7 +16,7 @@ func main() {
         panic(err)
     }
 
-    fmt.Printf("Yo %s, thats repl u can use\n", user.Username)
+    fmt.Printf("Current user: %s\n", user.Username)
     repl.StartREPL(os.Stdin, os.Stdout)
 }
 

@@ -32,6 +32,10 @@ func Eval(node ast.Node) object.Object {
         left := Eval(node.Left)
         right := Eval(node.Right)
         return evalInfixExpression(node.Operator, left, right)
+    case *ast.BlockStatement:
+        return evalStatements(node.Statements)
+    case *ast.IfExpression:
+        return evalIfExpression(node)
     }
 
     return NULL
@@ -84,6 +88,8 @@ func evalInfixExpression(
     switch {
     case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
         return evalIntegerInfixExpression(op, left, right)
+    case left.Type() == object.BOOL_OBJ || right.Type() == object.BOOL_OBJ:
+        return evalBoolInfixExpression(op, left, right)
     default:
         return NULL
     }
@@ -105,8 +111,88 @@ func evalIntegerInfixExpression(
             return &object.Integer{Value: leftVal / rightVal}
         case "**":
             return &object.Integer{Value: pow(leftVal, rightVal).(int64)}
+        case "<":
+            if leftVal < rightVal {
+                return TRUE
+            } else {
+                return FALSE
+            }
+        case ">":
+            if leftVal > rightVal {
+                return TRUE
+            } else {
+                return FALSE
+            }
+        case "<=":
+            if leftVal <= rightVal {
+                return TRUE
+            } else {
+                return FALSE
+            }
+        case ">=":
+            if leftVal >= rightVal {
+                return TRUE
+            } else {
+                return FALSE
+            }
+        case "==":
+            if leftVal == rightVal {
+                return TRUE
+            } else {
+                return FALSE
+            }
+        case "!=":
+            if leftVal == rightVal {
+                return FALSE
+            } else {
+                return TRUE
+            }
         default:
             return NULL
         }
 }
 
+func evalBoolInfixExpression(
+    op string, left, right object.Object) object.Object {
+        switch op {
+        case "==":
+            if left == right {
+                return TRUE
+            } else {
+                return FALSE
+            }
+        case "!=":
+            if left == right {
+                return FALSE
+            } else {
+                return TRUE
+            }
+        default:
+            return NULL
+        }
+}
+
+func evalIfExpression(ie *ast.IfExpression) object.Object {
+    condition := Eval(ie.Condition)
+
+    if checkCondition(condition) {
+        return Eval(ie.Consequence)
+    } else if ie.Alternative != nil {
+        return Eval(ie.Alternative)
+    } else {
+        return NULL
+    }
+}
+
+func checkCondition(obj object.Object) bool {
+    switch obj {
+        case TRUE:
+            return true
+        case FALSE:
+            return false
+        case NULL:
+            return false
+        default:
+            return true
+    }
+}

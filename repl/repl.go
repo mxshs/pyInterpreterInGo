@@ -12,7 +12,7 @@ import (
 	//"mxshs/pyinterpreter/token"
 )
 
-const PROMPT = "tokens only >> "
+const PROMPT = "eval is not stable yet >> "
 
 func StartREPL(in io.Reader, out io.Writer) {
     scanner := bufio.NewScanner(in)

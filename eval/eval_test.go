@@ -93,6 +93,42 @@ func TestBangOperator(t * testing.T) {
     }
 }
 
+func TestIfStatements(t *testing.T) {
+    tests := []struct {
+        input string
+        expected interface{}
+    } {
+        {"if (true): (69)", 69},
+        {"if (false): (420)", nil},
+        {"if (true): (69) else: (420)", 69},
+        {"if (false): (69) else: (420)", 420},
+        {"if (1 < 2): (69)", 69},
+        {"if (1 > 2): (420)", nil}, 
+        {"if (1 < 2): (69) else: (420)", 69},
+        {"if (1 > 2): (69) else: (420)", 420},
+    }
+
+    for _, tt := range tests {
+        evaluated := testEval(tt.input)
+        integer, ok := tt.expected.(int)
+        if ok {
+            testIntegerObject(t, evaluated, int64(integer))
+        } else {
+            testNullObject(t, evaluated)
+        }
+    }
+}
+
+func testNullObject(t *testing.T, obj object.Object) bool {
+    if obj.Type() == object.NULL_OBJ {
+        return true
+    } else {
+        t.Errorf("Expected object type: %s, got: %T (%+v)", object.NULL_OBJ,
+            obj, obj)
+        return false
+    }
+}
+
 func testEval(inp string) object.Object {
     l := lexer.GetLexer(inp)
     p := parser.GetParser(l)
