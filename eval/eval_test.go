@@ -1,11 +1,11 @@
 package eval
 
 import (
-    "mxshs/pyinterpreter/lexer"
-    "mxshs/pyinterpreter/object"
-    "mxshs/pyinterpreter/parser"
+	"mxshs/pyinterpreter/lexer"
+	"mxshs/pyinterpreter/object"
+	"mxshs/pyinterpreter/parser"
 
-    "testing"
+	"testing"
 )
 
 func TestEvalInteger(t *testing.T) {
@@ -119,6 +119,22 @@ func TestIfStatements(t *testing.T) {
     }
 }
 
+func TestReturnStatement(t *testing.T) {
+    tests := []struct {
+        input string
+        expected int64
+    } {
+        {"return 69", 69},
+        {"return 420 \n 420", 420},
+        {"return 69 * 420 \n 1337", 28980},
+    }
+
+    for _, tt := range tests {
+        evaluated := testEval(tt.input)
+        testIntegerObject(t, evaluated, tt.expected)
+    }
+}
+
 func testNullObject(t *testing.T, obj object.Object) bool {
     if obj.Type() == object.NULL_OBJ {
         return true
@@ -129,12 +145,79 @@ func testNullObject(t *testing.T, obj object.Object) bool {
     }
 }
 
+func TestAssignStatements(t *testing.T) {
+    tests := []struct {
+        input string
+        expected int64
+    } {
+        {"a = 69 \n a", 69},
+        {"a = 69 * 420 \n a", 28980},
+        {"a = 69 \n b = 420 \n a + b", 489},
+    }
+
+    for _, tt := range tests {
+        value := testEval(tt.input)
+        testIntegerObject(t, value, tt.expected)
+    }
+}
+
+func TestFunctionDef(t *testing.T) {
+    tests := []struct {
+        input string
+        args []string
+        body string
+    } {
+        {
+            "def sum(a, b): (return a + b)",
+            []string{"a", "b"},
+            "return (a + b)"},
+    }
+
+    for _, tt := range tests {
+        evaluated := testEval(tt.input)
+
+        function, ok := evaluated.(*object.Function)
+        if !ok {
+            t.Errorf("Expected object type: Function, got: %T (%+v)",
+                evaluated, evaluated)
+        }
+
+        for i, arg := range tt.args {
+            act_arg := function.Arguments[i].String()  
+            if act_arg != arg {
+                t.Errorf("Expected function arg at %d: %s, got: %s",
+                    i, arg, act_arg)
+            }
+        }
+
+        if function.Body.String() != tt.body {
+            t.Errorf("Expected function body: %+v, got: %+v", 
+                tt.body, function.Body.String())
+        }
+    }
+}
+
+func TestFunctions(t *testing.T) {
+    tests := []struct {
+        input string
+        expected int64
+    }{
+        {"def sum(a, b): return (a + b) \n sum(3, 5)", 8},
+    }
+
+    for _, tt := range tests {
+        testIntegerObject(t, testEval(tt.input), tt.expected)
+    }
+}
+
 func testEval(inp string) object.Object {
     l := lexer.GetLexer(inp)
     p := parser.GetParser(l)
 
     program := p.ParseProgram()
 
-    return Eval(program)
+    env := object.NewEnv()
+
+    return Eval(program, env)
 }
 

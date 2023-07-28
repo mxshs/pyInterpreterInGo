@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+
 	//"reflect"
 
 	"mxshs/pyinterpreter/eval"
 	"mxshs/pyinterpreter/lexer"
+	"mxshs/pyinterpreter/object"
 	"mxshs/pyinterpreter/parser"
 	//"mxshs/pyinterpreter/token"
 )
@@ -16,6 +18,7 @@ const PROMPT = "eval is not stable yet >> "
 
 func StartREPL(in io.Reader, out io.Writer) {
     scanner := bufio.NewScanner(in)
+    env := object.NewEnv()
 
     for {
         fmt.Print(PROMPT)
@@ -38,7 +41,7 @@ func StartREPL(in io.Reader, out io.Writer) {
             continue
         }
 
-        evaluated := eval.Eval(program)
+        evaluated := eval.Eval(program, env)
 
         if evaluated != nil {
             io.WriteString(out, evaluated.Inspect())
@@ -49,3 +52,4 @@ func StartREPL(in io.Reader, out io.Writer) {
 //        }
     }
 }
+

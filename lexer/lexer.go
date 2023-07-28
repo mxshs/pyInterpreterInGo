@@ -177,7 +177,7 @@ func isDigit(ch byte) bool {
 }
 
 func (l *Lexer) omitSymbol() {
-    for l.ch == ' ' || l.ch == '\t' || l.ch == '\r' {
+    for l.ch == ' ' || l.ch == '\t' || l.ch == '\r' || l.ch == '\n' {
         l.nextChar()
     }
 }
