@@ -14,6 +14,7 @@ const (
 
     NAME = "NAME"
     INT = "INT"
+    STRING = "STRING"
 
     ASSIGN = "="
     PLUS = "+"
@@ -29,7 +30,6 @@ const (
     NOT_EQ = "!="
     LESS_EQ = "<="
     GREATER_EQ = ">="
-
 
     PLUS_ASSIGN = "+="
     MINUS_ASSIGN = "-="
@@ -73,3 +73,4 @@ func LookupKey(key string) TokenType{
 
     return NAME
 }
+

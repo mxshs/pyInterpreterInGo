@@ -10,6 +10,7 @@ import (
 const (
     INTEGER_OBJ = "INTEGER"
     BOOL_OBJ = "BOOLEAN"
+    STRING_OBJ = "STIRNG"
     NULL_OBJ = "NULL"
     RETURN_VALUE = "RETURN_VALUE"
     ERROR_OBJ = "ERROR"
@@ -45,6 +46,18 @@ func (b *Boolean) Type() ObjectType {
 
 func (b *Boolean) Inspect() string {
     return fmt.Sprintf("%t", b.Value)
+}
+
+type String struct {
+    Value string
+}
+
+func (s *String) Type() ObjectType {
+    return STRING_OBJ
+}
+
+func (s *String) Inspect() string {
+    return s.Value
 }
 
 type Null struct {

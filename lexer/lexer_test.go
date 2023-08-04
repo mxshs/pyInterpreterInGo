@@ -229,7 +229,7 @@ func TestTokens(t *testing.T) {
     l := GetLexer(input)
 
     for i, tt := range tests {
-        tok := l.nextToken()
+        tok := l.NextToken()
 
         if tok.Type != tt.expectedType {
             t.Fatalf("tests[%d] - wrong token type: expected %q, got %q",
@@ -242,3 +242,4 @@ func TestTokens(t *testing.T) {
         }
     }
 }
+

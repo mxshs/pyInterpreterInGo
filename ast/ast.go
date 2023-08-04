@@ -157,6 +157,22 @@ func (b *Boolean) String() string {
     return b.Token.Literal
 }
 
+type StringLiteral struct {
+    Token token.Token
+    Value string
+}
+
+func (s *StringLiteral) expressionNode() {
+}
+
+func (s *StringLiteral) TokenLiteral() string {
+    return s.Token.Literal
+}
+
+func (s *StringLiteral) String() string {
+    return s.Token.Literal
+}
+
 type IfExpression struct {
     Token token.Token
     Condition Expression

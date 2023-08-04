@@ -26,6 +26,8 @@ func Eval(node ast.Node, env *object.Env) object.Object {
         } else {
             return FALSE
         }
+    case *ast.StringLiteral:
+        return &object.String{Value: node.Value}
     case *ast.PrefixExpression:
         operand := Eval(node.Right, env)
         if isError(operand) {
@@ -133,7 +135,7 @@ func evalPrefixExpression(op string, operand object.Object) object.Object {
     case "-":
         return evalMinusPrefixOperatorExpression(operand)
     default:
-        return newError("Unknown operator %s for type %s", op, operand.Type())
+        return newError("unknown operator %s for type %s", op, operand.Type())
     }
 }
 
@@ -152,7 +154,7 @@ func evalBangOperatorExpression(operand object.Object) object.Object {
 
 func evalMinusPrefixOperatorExpression(operand object.Object) object.Object {
     if operand.Type() != object.INTEGER_OBJ {
-        return newError("Unknown operator - for type %s",
+        return newError("unknown operator - for type %s",
             operand.Type(),
         )
     }
@@ -167,14 +169,16 @@ func evalInfixExpression(
         return evalIntegerInfixExpression(op, left, right)
     case left.Type() == object.BOOL_OBJ || right.Type() == object.BOOL_OBJ:
         return evalBoolInfixExpression(op, left, right)
+    case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
+        return evalStringInfixExpression(op, left, right)
     case left.Type() != right.Type():
-        return newError("Type mismatch in %s %s %s",
+        return newError("type mismatch in %s %s %s",
             op,
             left.Type(),
             right.Type(),
         )
     default:
-        return newError("Unknown operator %s for types %s and %s", 
+        return newError("unknown operator %s for types %s and %s", 
             op,
             left.Type(),
             right.Type(),
@@ -235,7 +239,7 @@ func evalIntegerInfixExpression(
                 return TRUE
             }
         default:
-            return newError("Unknown operator %s for types %s and %s",
+            return newError("unknown operator %s for types %s and %s",
                 op,
                 left.Type(),
                 right.Type(),
@@ -263,6 +267,21 @@ func evalBoolInfixExpression(
         }
 }
 
+func evalStringInfixExpression(op string,
+    left, right object.Object) object.Object {
+    switch op {
+    case "+":
+        return &object.String{
+            Value: left.(*object.String).Value + right.(*object.String).Value}
+    default:
+        return newError("unknown operator %s for types %s and %s",
+            op,
+            left.Type(),
+            right.Type(),
+        )
+    }
+}
+
 func evalIfExpression(ie *ast.IfExpression, env *object.Env) object.Object {
     condition := Eval(ie.Condition, env)
     if isError(condition) {
@@ -281,7 +300,7 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Env) object.Object {
 func evalName(name *ast.Name, env *object.Env) object.Object {
     val, ok := env.Get(name.Value)
     if !ok {
-        return newError("Name is not declared: %s", name.Value)
+        return newError("name is not declared: %s", name.Value)
     }
 
     return val
@@ -319,8 +338,17 @@ func runFunction(
     }
 
     evaluated := Eval(fn.Body, fnEnv)
+    res := convertFunctionReturn(evaluated)
 
-    return evaluated.(*object.ReturnValue).Value
+    return res
+}
+
+func convertFunctionReturn(res object.Object) object.Object {
+    if val, ok := res.(*object.ReturnValue); ok {
+        return val.Value
+    }
+
+    return res
 }
 
 func checkCondition(obj object.Object) bool {

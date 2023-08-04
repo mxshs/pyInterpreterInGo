@@ -68,6 +68,7 @@ func GetParser(l *lexer.Lexer) *Parser {
     p.registerPrefix(token.INT, p.parseIntegerLiteral)
     p.registerPrefix(token.BTRUE, p.parseBoolean)
     p.registerPrefix(token.BFALSE, p.parseBoolean)
+    p.registerPrefix(token.STRING, p.parseString)
     p.registerPrefix(token.LPAR, p.parseGroupedExpression)
     p.registerPrefix(token.IF, p.parseIfExpression)
     p.registerPrefix(token.MINUS, p.parsePrefixExpression)
@@ -98,7 +99,11 @@ func (p *Parser) Errors() []string {
 }
 
 func (p *Parser) peekError(t token.TokenType) {
-    msg := fmt.Sprintf("expected token of type: %s, got: %s", t, p.peekToken.Type)
+    msg := fmt.Sprintf(
+        "expected token of type: %s, got: %s",
+        t,
+        p.peekToken.Type,
+    )
     p.errors = append(p.errors, msg)
 }
 
@@ -203,7 +208,10 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
     value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
     if err != nil {
-        msg := fmt.Sprintf("error during parsing %q as integer", p.curToken.Literal)
+        msg := fmt.Sprintf(
+            "error during parsing %q as integer",
+            p.curToken.Literal,
+        )
         p.errors = append(p.errors, msg)
         return nil
     }
@@ -218,12 +226,21 @@ func (p *Parser) parseBoolean() ast.Expression {
 
     value, err := strconv.ParseBool(p.curToken.Literal)
     if err != nil {
-        msg := fmt.Sprintf("Bool parse error. Cannot convert %s to bool", p.curToken.Literal)
+        msg := fmt.Sprintf(
+            "boolean parse error. Cannot convert %s to boolean",
+            p.curToken.Literal,
+        )
         p.errors = append(p.errors, msg)
         return nil
     }
 
     literal.Value = value
+
+    return literal
+}
+
+func (p *Parser) parseString() ast.Expression {
+    literal := &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
 
     return literal
 }
@@ -474,3 +491,4 @@ func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParse) {
 func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParse) {
     p.infixParsers[tokenType] = fn
 }
+

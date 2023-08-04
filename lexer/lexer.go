@@ -117,6 +117,9 @@ func (l *Lexer) NextToken() token.Token {
         tok = newToken(token.COMMA, l.ch)
     case ':':
         tok = newToken(token.COLON, l.ch)
+    case '"':
+        tok.Type = token.STRING
+        tok.Literal = l.readString()
     case '\n':
         tok = newToken(token.NEWL, l.ch)
     case 0:
@@ -168,6 +171,19 @@ func (l *Lexer) readNumber() string {
     return l.input[position:l.position]
 }
 
+func (l *Lexer) readString() string {
+    position := l.position + 1
+
+    for {
+        l.nextChar()
+        if l.ch == '"' || l.ch == 0 || l.ch == '\n' {
+            break
+        }
+    }
+
+    return l.input[position:l.position]
+}
+
 func isLetter(ch byte) bool {
     return ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch == '_'
 }
@@ -189,3 +205,4 @@ func (l *Lexer) peekChar() byte {
         return l.input[l.readPosition]
     }
 }
+

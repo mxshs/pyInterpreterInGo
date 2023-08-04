@@ -25,14 +25,23 @@ func (e *Env) Get(name string) (Object, bool) {
     return obj, ok
 }
 
-func (e *Env) Set(name string, value Object) Object {
+func (e *Env) findInGlobalScope(name string) (*Env, bool) {
     _, ok := e.store[name]
     if !ok && e.parent != nil {
-        e.parent.Set(name, value)
+        e, ok = e.parent.findInGlobalScope(name)
+    }
+
+    return e, ok
+}
+
+func (e *Env) Set(name string, value Object) Object {
+    parent, ok := e.findInGlobalScope(name)
+    if ok {
+        parent.store[name] = value
     } else {
         e.store[name] = value
     }
-    
+
     return value
 }
 
