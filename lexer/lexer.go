@@ -132,7 +132,7 @@ func (l *Lexer) NextToken() token.Token {
             return tok
         } else if isDigit(l.ch) {
             tok.Literal = l.readNumber()
-            tok.Type = token.INT
+            tok.Type = token.NUM
             return tok
         } else {
             panic(
@@ -164,9 +164,23 @@ func (l *Lexer) readIdent() string {
 
 func (l *Lexer) readNumber() string {
     position := l.position
-    for isDigit(l.ch) {
-        l.nextChar()
+    var flag bool
+
+    for {
+        if isDigit(l.ch) || l.ch == '_' {
+            l.nextChar()
+        } else if l.ch == '.' {
+            if flag {
+                break
+            } else {
+                flag = true
+            }    
+            l.nextChar()
+        } else {
+            break
+        }
     }
+    fmt.Println("im done")
 
     return l.input[position:l.position]
 }

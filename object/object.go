@@ -9,12 +9,14 @@ import (
 
 const (
     INTEGER_OBJ = "INTEGER"
+    FLOAT_OBJ = "FLOAT"
     BOOL_OBJ = "BOOLEAN"
     STRING_OBJ = "STIRNG"
     NULL_OBJ = "NULL"
     RETURN_VALUE = "RETURN_VALUE"
     ERROR_OBJ = "ERROR"
     FUNCTION_OBJ = "FUNCTION"
+    BLTINFN = "BUILTIN_FUNCTION"
 )
 
 type ObjectType string
@@ -34,6 +36,26 @@ func (i *Integer) Type() ObjectType {
 
 func (i *Integer) Inspect() string {
     return fmt.Sprintf("%d", i.Value)
+}
+
+func (i *Integer) GetValue() int64 {
+    return i.Value
+}
+
+type Float struct {
+    Value float64
+}
+
+func (f *Float) Type() ObjectType {
+    return FLOAT_OBJ
+}
+
+func (f *Float) Inspect() string {
+    return fmt.Sprintf("%f", f.Value)
+}
+
+func (f *Float) GetValue() float64 {
+    return f.Value
 }
 
 type Boolean struct {
@@ -119,5 +141,19 @@ func (f *Function) Inspect() string {
     out.WriteString(":\n" + f.Body.String() + "\n")
 
     return out.String()
+}
+
+type BltinFunction func(args ...Object) Object
+
+type BltinFn struct {
+    Fn BltinFunction
+}
+
+func (b *BltinFn) Type() ObjectType {
+    return BLTINFN
+}
+
+func (b *BltinFn) Inspect() string {
+    return "built-in function"
 }
 

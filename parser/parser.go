@@ -65,7 +65,7 @@ func GetParser(l *lexer.Lexer) *Parser {
 
     p.prefixParsers = make(map[token.TokenType]prefixParse)
     p.registerPrefix(token.NAME, p.parseName)
-    p.registerPrefix(token.INT, p.parseIntegerLiteral)
+    p.registerPrefix(token.NUM, p.parseNumberLiteral)
     p.registerPrefix(token.BTRUE, p.parseBoolean)
     p.registerPrefix(token.BFALSE, p.parseBoolean)
     p.registerPrefix(token.STRING, p.parseString)
@@ -203,23 +203,50 @@ func (p *Parser) parseName() ast.Expression {
     return &ast.Name{Token: p.curToken, Value: p.curToken.Literal}
 }
 
-func (p *Parser) parseIntegerLiteral() ast.Expression {
-    literal := &ast.IntegerLiteral{Token: p.curToken}
-
+func (p *Parser) parseNumberLiteral() ast.Expression {
     value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+    fmt.Println("parsed digit", value)
     if err != nil {
-        msg := fmt.Sprintf(
-            "error during parsing %q as integer",
-            p.curToken.Literal,
-        )
-        p.errors = append(p.errors, msg)
-        return nil
+        value, err := strconv.ParseFloat(p.curToken.Literal, 64)
+        if err != nil {
+            msg := fmt.Sprintf(
+                "error during parsing %q as numeric value (integer or float)",
+                p.curToken.Literal,
+            )
+            p.errors = append(p.errors, msg)
+            
+            return nil
+        }
+    
+        return &ast.FloatLiteral{
+            Token: p.curToken,
+            Value: value,
+        }
     }
 
-    literal.Value = value
-
-    return literal
+    return &ast.IntegerLiteral{
+        Token: p.curToken,
+        Value: value,
+    }
 }
+
+//func (p *Parser) parseFloatLiteral() ast.Expression {
+//    literal := &ast.FloatLiteral{Token: p.curToken}
+//
+//    value, err := strconv.ParseFloat(p.curToken.Literal, 64)
+//    if err != nil {
+//        msg := fmt.Sprintf(
+//            "error during parsing %q as float",
+//            p.curToken.Literal,
+//        )
+//        p.errors = append(p.errors, msg)
+//        return nil
+//    }
+//
+//    literal.Value = value
+//
+//    return literal
+//}
 
 func (p *Parser) parseBoolean() ast.Expression {
     literal := &ast.Boolean{Token: p.curToken}

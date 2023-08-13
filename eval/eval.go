@@ -20,6 +20,8 @@ func Eval(node ast.Node, env *object.Env) object.Object {
         return Eval(node.Expression, env)
     case *ast.IntegerLiteral:
         return &object.Integer{Value: node.Value}
+    case *ast.FloatLiteral:
+        return &object.Float{Value: node.Value}
     case *ast.Boolean:
         if node.Value {
             return TRUE
@@ -165,8 +167,22 @@ func evalMinusPrefixOperatorExpression(operand object.Object) object.Object {
 func evalInfixExpression(
     op string, left, right object.Object) object.Object {
     switch {
-    case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
-        return evalIntegerInfixExpression(op, left, right)
+    case (IsNumeric(left) && IsNumeric(right)):
+        switch left.Type() {
+        case object.INTEGER_OBJ:
+            if right.Type() == object.INTEGER_OBJ {
+                return evalIntegerInfixExpression[int64, int64](
+                    op,
+                    left.(*object.Integer),
+                    right.(*object.Integer), 0)
+            } 
+            return evalIntegerInfixExpression[int64, float64](op, left.(*object.Integer), right.(*object.Float), 1)
+        case object.FLOAT_OBJ:
+            if right.Type() == object.INTEGER_OBJ {
+                return evalIntegerInfixExpression[float64, int64](op, left.(*object.Float), right.(*object.Integer), 1)
+            }
+        }
+        return evalIntegerInfixExpression[float64, float64](op, left.(*object.Float), right.(*object.Float), 1)
     case left.Type() == object.BOOL_OBJ || right.Type() == object.BOOL_OBJ:
         return evalBoolInfixExpression(op, left, right)
     case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
@@ -186,57 +202,127 @@ func evalInfixExpression(
     }
 }
 
-func evalIntegerInfixExpression(
-    op string, left, right object.Object) object.Object {
-    leftVal := left.(*object.Integer).Value
-    rightVal := right.(*object.Integer).Value
+type Numeric[T ~int64 | ~float64] interface {
+    GetValue() T
+    Inspect() string
+    Type() object.ObjectType
+}
+
+func evalIntegerInfixExpression[T, I ~int64 | ~float64](
+    op string, left Numeric[T], right Numeric[I], out int) object.Object {
+    leftVal := left.GetValue()
+    rightVal := right.GetValue()
+
+
+    //if _, ok := leftVal.(float64); ok {
+    //    a := float64()
+    //    leftVal = leftVal.(float64)
+    //    if _, ok = rightVal.(float64); ok {
+    //        rightVal = rightVal.(float64)
+    //    } else {
+    //        rightVal = float64(rightVal.(int64))
+    //    }
+    //} else if _, ok := rightVal.(float64); ok {
+    //    rightVal = rightVal.(float64)
+    //    leftVal = float64(leftVal.(int64))
+    //} else {
+    //    leftVal, rightVal = leftVal.(int64), rightVal.(int64)
+    //}
 
     switch op {
         case "+":
-            return &object.Integer{Value: leftVal + rightVal}
+            if out == 0 {
+                return &object.Integer{Value: int64(leftVal) + int64(rightVal)}
+            }
+            return &object.Float{Value: float64(leftVal) + float64(rightVal)}
         case "-": 
-            return &object.Integer{Value: leftVal - rightVal}
+            if out == 0 {
+                return &object.Integer{Value: int64(leftVal) - int64(rightVal)}
+            }
+            return &object.Float{Value: float64(leftVal) - float64(rightVal)}
         case "*":
-            return &object.Integer{Value: leftVal * rightVal}
+            if out == 0 {
+                return &object.Integer{Value: int64(leftVal) * int64(rightVal)}
+            }
+            return &object.Float{Value: float64(leftVal) * float64(rightVal)}
         case "/":
-            return &object.Integer{Value: leftVal / rightVal}
+            if out == 0 {
+                return &object.Integer{Value: int64(leftVal) / int64(rightVal)}
+            }
+            return &object.Float{Value: float64(leftVal) / float64(rightVal)}
         case "**":
-            return &object.Integer{Value: pow(leftVal, rightVal).(int64)}
+            return pow(left, right)
         case "<":
-            if leftVal < rightVal {
-                return TRUE
+            if out == 0 {
+                if int64(leftVal) < int64(rightVal) {
+                    return TRUE
+                }
+                return FALSE
             } else {
+                if float64(leftVal) < float64(rightVal) {
+                    return TRUE
+                }
                 return FALSE
             }
         case ">":
-            if leftVal > rightVal {
-                return TRUE
+            if out == 0 {
+                if int64(leftVal) > int64(rightVal) {
+                    return TRUE
+                }
+                return FALSE
             } else {
+                if float64(leftVal) > float64(rightVal) {
+                    return TRUE
+                }
                 return FALSE
             }
         case "<=":
-            if leftVal <= rightVal {
-                return TRUE
+            if out == 0 {
+                if int64(leftVal) <= int64(rightVal) {
+                    return TRUE
+                }
+                return FALSE
             } else {
+                if float64(leftVal) <= float64(rightVal) {
+                    return TRUE
+                }
                 return FALSE
             }
         case ">=":
-            if leftVal >= rightVal {
-                return TRUE
+            if out == 0 {
+                if int64(leftVal) >= int64(rightVal) {
+                    return TRUE
+                }
+                return FALSE
             } else {
+                if float64(leftVal) >= float64(rightVal) {
+                    return TRUE
+                }
                 return FALSE
             }
         case "==":
-            if leftVal == rightVal {
-                return TRUE
+            if out == 0 {
+                if int64(leftVal) == int64(rightVal) {
+                    return TRUE
+                }
+                return FALSE
             } else {
+                if float64(leftVal) == float64(rightVal) {
+                    return TRUE
+                }
                 return FALSE
             }
         case "!=":
-            if leftVal == rightVal {
+            if out == 0 {
+                if int64(leftVal) != int64(rightVal) {
+                    return TRUE
+                }
                 return FALSE
             } else {
-                return TRUE
+                if float64(leftVal) != float64(rightVal) {
+                    return TRUE
+                }
+                return FALSE
             }
         default:
             return newError("unknown operator %s for types %s and %s",
@@ -299,11 +385,16 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Env) object.Object {
 
 func evalName(name *ast.Name, env *object.Env) object.Object {
     val, ok := env.Get(name.Value)
-    if !ok {
-        return newError("name is not declared: %s", name.Value)
+    if ok {
+        return val
     }
 
-    return val
+    val, ok = builtin[name.Value]
+    if ok {
+        return val
+    }
+
+    return newError("name is not declared: %s", name.Value)
 }
 
 func evalExpressions(

@@ -13,7 +13,7 @@ const (
     NEWL = "\n"
 
     NAME = "NAME"
-    INT = "INT"
+    NUM = "NUM"
     STRING = "STRING"
 
     ASSIGN = "="
