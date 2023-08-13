@@ -213,22 +213,6 @@ func evalIntegerInfixExpression[T, I ~int64 | ~float64](
     leftVal := left.GetValue()
     rightVal := right.GetValue()
 
-
-    //if _, ok := leftVal.(float64); ok {
-    //    a := float64()
-    //    leftVal = leftVal.(float64)
-    //    if _, ok = rightVal.(float64); ok {
-    //        rightVal = rightVal.(float64)
-    //    } else {
-    //        rightVal = float64(rightVal.(int64))
-    //    }
-    //} else if _, ok := rightVal.(float64); ok {
-    //    rightVal = rightVal.(float64)
-    //    leftVal = float64(leftVal.(int64))
-    //} else {
-    //    leftVal, rightVal = leftVal.(int64), rightVal.(int64)
-    //}
-
     switch op {
         case "+":
             if out == 0 {

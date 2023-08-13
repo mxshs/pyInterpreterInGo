@@ -230,24 +230,6 @@ func (p *Parser) parseNumberLiteral() ast.Expression {
     }
 }
 
-//func (p *Parser) parseFloatLiteral() ast.Expression {
-//    literal := &ast.FloatLiteral{Token: p.curToken}
-//
-//    value, err := strconv.ParseFloat(p.curToken.Literal, 64)
-//    if err != nil {
-//        msg := fmt.Sprintf(
-//            "error during parsing %q as float",
-//            p.curToken.Literal,
-//        )
-//        p.errors = append(p.errors, msg)
-//        return nil
-//    }
-//
-//    literal.Value = value
-//
-//    return literal
-//}
-
 func (p *Parser) parseBoolean() ast.Expression {
     literal := &ast.Boolean{Token: p.curToken}
 
