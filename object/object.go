@@ -9,12 +9,15 @@ import (
 
 const (
     INTEGER_OBJ = "INTEGER"
+    FLOAT_OBJ = "FLOAT"
     BOOL_OBJ = "BOOLEAN"
     STRING_OBJ = "STIRNG"
     NULL_OBJ = "NULL"
     RETURN_VALUE = "RETURN_VALUE"
     ERROR_OBJ = "ERROR"
     FUNCTION_OBJ = "FUNCTION"
+    BLTIN = "BLTIN_FN"
+    LIST = "LIST"
 )
 
 type ObjectType string
@@ -34,6 +37,18 @@ func (i *Integer) Type() ObjectType {
 
 func (i *Integer) Inspect() string {
     return fmt.Sprintf("%d", i.Value)
+}
+
+type Float struct {
+    Value float64
+}
+
+func (f *Float) Type() ObjectType {
+    return FLOAT_OBJ 
+}
+
+func (f *Float) Inspect() string {
+    return fmt.Sprintf("%f", f.Value)
 }
 
 type Boolean struct {
@@ -121,3 +136,38 @@ func (f *Function) Inspect() string {
     return out.String()
 }
 
+type BuiltinFunction func(args ...Object) Object
+
+type Bltin struct {
+    Fn BuiltinFunction
+}
+
+func (b *Bltin) Type() ObjectType {
+    return BLTIN
+}
+
+func (b *Bltin) Inspect() string {
+    return "builtin function"
+}
+
+type List struct {
+    Arr []Object
+}
+
+func (l *List) Type() ObjectType {
+    return LIST
+}
+
+func (l *List) Inspect() string {
+    var out bytes.Buffer
+
+    out.WriteString("list([")
+
+    for _, elem := range l.Arr[:len(l.Arr) - 1] {
+        out.WriteString(elem.Inspect() + ", ")
+    }
+
+    out.WriteString(l.Arr[len(l.Arr) - 1].Inspect() + "])")
+
+    return out.String()
+}

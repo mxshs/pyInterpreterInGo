@@ -142,6 +142,20 @@ func (il *IntegerLiteral) String() string {
     return il.Token.Literal
 }
 
+type FloatLiteral struct {
+    Token token.Token
+    Value float64
+}
+
+func (fl *FloatLiteral) expressionNode() {}
+
+func (fl *FloatLiteral) TokenLiteral() string {
+    return fl.Token.Literal
+}
+func (fl *FloatLiteral) String() string {
+    return fl.Token.Literal
+}
+
 type Boolean struct {
     Token token.Token
     Value bool
@@ -326,6 +340,53 @@ func (ce *CallExpression) String() string {
 
     out.WriteString("(" + strings.Join(args, ", ") + "))")
     
+    return out.String()
+}
+
+type ListLiteral struct {
+    Token token.Token
+    Arr []Expression
+}
+
+func (ll *ListLiteral) expressionNode() {}
+
+func (ll *ListLiteral) TokenLiteral() string {
+    return ll.Token.Literal
+}
+
+func (ll *ListLiteral) String() string {
+    var out bytes.Buffer
+
+    out.WriteString("list([")
+
+    for _, elem := range ll.Arr {
+        out.WriteString(elem.String() + ", ")
+    }
+
+    out.WriteString("])")
+
+    return out.String()
+}
+
+type IndexExpression struct {
+    Token token.Token
+    Struct Expression
+    Value Expression
+}
+
+func (ie *IndexExpression) expressionNode() {}
+
+func (ie *IndexExpression) TokenLiteral() string {
+    return ie.Token.Literal
+}
+
+func (ie *IndexExpression) String() string {
+    var out bytes.Buffer
+
+    out.WriteString("(" + ie.Struct.String())
+    out.WriteString("[" + ie.Value.String() + "]")
+    out.WriteString(")")
+
     return out.String()
 }
 

@@ -19,6 +19,7 @@ const (
     POWER
     PREFIX
     CALL
+    INDEX
 )
 
 // TODO: test assignment as infix expression, i.e. ignore assign statement and
@@ -39,6 +40,7 @@ var precedenceMap = map[token.TokenType]int{
     token.STAR: PRODUCT,
     token.DOUBLE_STAR: POWER,
     token.LPAR: CALL,
+    token.LBR: INDEX,
 }
 
 type Parser struct {
@@ -66,6 +68,7 @@ func GetParser(l *lexer.Lexer) *Parser {
     p.prefixParsers = make(map[token.TokenType]prefixParse)
     p.registerPrefix(token.NAME, p.parseName)
     p.registerPrefix(token.INT, p.parseIntegerLiteral)
+    p.registerPrefix(token.FLOAT, p.parseFloatLiteral)
     p.registerPrefix(token.BTRUE, p.parseBoolean)
     p.registerPrefix(token.BFALSE, p.parseBoolean)
     p.registerPrefix(token.STRING, p.parseString)
@@ -75,6 +78,7 @@ func GetParser(l *lexer.Lexer) *Parser {
     p.registerPrefix(token.BANG, p.parsePrefixExpression)
     p.registerPrefix(token.STAR, p.parsePrefixExpression)
     p.registerPrefix(token.DOUBLE_STAR, p.parsePrefixExpression)
+    p.registerPrefix(token.LBR, p.parseListExpression)
 
     p.infixParsers = make(map[token.TokenType]infixParse)
     p.registerInfix(token.LPAR, p.parseCallExpression)
@@ -87,6 +91,7 @@ func GetParser(l *lexer.Lexer) *Parser {
     p.registerInfix(token.SLASH, p.parseInfixExpression)
     p.registerInfix(token.STAR, p.parseInfixExpression)
     p.registerInfix(token.DOUBLE_STAR, p.parseInfixExpression)
+    p.registerInfix(token.LBR, p.parseIndexExpression)
 
     p.nextToken()
     p.nextToken()
@@ -210,6 +215,24 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
     if err != nil {
         msg := fmt.Sprintf(
             "error during parsing %q as integer",
+            p.curToken.Literal,
+        )
+        p.errors = append(p.errors, msg)
+        return nil
+    }
+
+    literal.Value = value
+
+    return literal
+}
+
+func (p *Parser) parseFloatLiteral() ast.Expression {
+    literal := &ast.FloatLiteral{Token: p.curToken}
+
+    value, err := strconv.ParseFloat(p.curToken.Literal, 64)
+    if err != nil {
+        msg := fmt.Sprintf(
+            "error during parsing %q as float",
             p.curToken.Literal,
         )
         p.errors = append(p.errors, msg)
@@ -433,6 +456,44 @@ func (p *Parser) parseCallArguments() []ast.Expression {
     }
 
     return args
+}
+
+func (p *Parser) parseListExpression() ast.Expression {
+    p.nextToken()
+
+    if p.peekTokenIs(token.COMMA) {
+        arr := []ast.Expression{p.parseExpression(LOWEST)}
+
+        for p.peekTokenIs(token.COMMA){
+            p.nextToken()
+            p.nextToken()
+            arr = append(arr, p.parseExpression(LOWEST))
+        }
+
+        if !p.expectPeek(token.RBR) {
+            return nil
+        }
+
+        return &ast.ListLiteral{Arr: arr}
+    }
+
+    return nil
+}
+
+func (p *Parser) parseIndexExpression(sequence ast.Expression) ast.Expression {
+    expression := &ast.IndexExpression{
+        Token: p.curToken,
+        Struct: sequence,
+    }
+    p.nextToken()
+
+    expression.Value = p.parseExpression(LOWEST)
+
+    if !p.expectPeek(token.RBR) {
+        return nil
+    }
+
+    return expression
 }
 
 func (p *Parser) tokenIs (t token.TokenType) bool {

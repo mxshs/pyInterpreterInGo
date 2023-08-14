@@ -113,6 +113,10 @@ func (l *Lexer) NextToken() token.Token {
         tok = newToken(token.LPAR, l.ch)
     case ')':
         tok = newToken(token.RPAR, l.ch)
+    case '[':
+        tok = newToken(token.LBR, l.ch)
+    case ']':
+        tok = newToken(token.RBR, l.ch)
     case ',':
         tok = newToken(token.COMMA, l.ch)
     case ':':
@@ -131,8 +135,13 @@ func (l *Lexer) NextToken() token.Token {
             tok.Type = token.LookupKey(tok.Literal)
             return tok
         } else if isDigit(l.ch) {
-            tok.Literal = l.readNumber()
-            tok.Type = token.INT
+            literal, flag := l.readNumber()
+            tok.Literal = literal
+            if flag {
+                tok.Type = token.FLOAT
+            } else {
+                tok.Type = token.INT
+            }
             return tok
         } else {
             panic(
@@ -162,13 +171,26 @@ func (l *Lexer) readIdent() string {
     return l.input[position:l.position]
 }
 
-func (l *Lexer) readNumber() string {
+func (l *Lexer) readNumber() (string, bool) {
+    var flag bool
     position := l.position
-    for isDigit(l.ch) {
-        l.nextChar()
+
+    for {
+        if isDigit(l.ch) {
+            l.nextChar()
+        } else if l.ch == '.' {
+            l.nextChar()
+            if flag {
+                break
+            }
+
+            flag = true
+        } else {
+            break
+        }
     }
 
-    return l.input[position:l.position]
+    return l.input[position:l.position], flag
 }
 
 func (l *Lexer) readString() string {

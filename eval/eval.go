@@ -20,6 +20,8 @@ func Eval(node ast.Node, env *object.Env) object.Object {
         return Eval(node.Expression, env)
     case *ast.IntegerLiteral:
         return &object.Integer{Value: node.Value}
+    case *ast.FloatLiteral:
+        return &object.Float{Value: node.Value}
     case *ast.Boolean:
         if node.Value {
             return TRUE
@@ -87,6 +89,24 @@ func Eval(node ast.Node, env *object.Env) object.Object {
         }
         
         return runFunction(function, args)
+    case *ast.ListLiteral:
+        elements := []object.Object{}
+        for _, elem := range node.Arr {
+            elements = append(elements, Eval(elem, env))
+        }
+        return &object.List{Arr: elements}
+    case *ast.IndexExpression:
+        Struct := Eval(node.Struct, env)
+        if isError(Struct) {
+            return Struct
+        }
+
+        idx := Eval(node.Value, env)
+        if isError(idx) {
+            return idx
+        }
+        
+        return evalIndexExpression(Struct, idx)
     }
 
     return NULL
@@ -299,11 +319,16 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Env) object.Object {
 
 func evalName(name *ast.Name, env *object.Env) object.Object {
     val, ok := env.Get(name.Value)
-    if !ok {
-        return newError("name is not declared: %s", name.Value)
+    if ok {
+        return val
     }
 
-    return val
+    val, ok = bltins[name.Value]
+    if ok {
+        return val
+    }
+
+    return newError("name is not declared: %s", name.Value)
 }
 
 func evalExpressions(
@@ -326,21 +351,22 @@ func evalExpressions(
 func runFunction(
     function object.Object, args []object.Object) object.Object {
 
-    fn, ok := function.(*object.Function)
-    if !ok {
-        return newError("expected type Function, got: %s", fn.Type())
+    switch function := function.(type) {
+    case *object.Bltin:
+        return function.Fn(args...)
+    case *object.Function:
+        fnEnv := object.NewNestedEnv(function.Env)
+
+        for i, arg := range function.Arguments {
+            fnEnv.Set(arg.Value, args[i])
+        }
+
+        evaluated := Eval(function.Body, fnEnv)
+
+        return convertFunctionReturn(evaluated)    
+    default:
+        return newError("expected type Function, got: %s", function.Type())
     }
-
-    fnEnv := object.NewNestedEnv(fn.Env)
-    
-    for i, arg := range fn.Arguments {
-        fnEnv.Set(arg.Value, args[i])
-    }
-
-    evaluated := Eval(fn.Body, fnEnv)
-    res := convertFunctionReturn(evaluated)
-
-    return res
 }
 
 func convertFunctionReturn(res object.Object) object.Object {
@@ -349,6 +375,30 @@ func convertFunctionReturn(res object.Object) object.Object {
     }
 
     return res
+}
+
+func evalIndexExpression(Struct, index object.Object) object.Object {
+    switch {
+    case Struct.Type() == object.LIST && index.Type() == object.INTEGER_OBJ:
+        return evalListIndexExpression(Struct, index)
+    default:
+        return newError(
+            "attempting to apply unsupported index: %s[%s]",
+            Struct.Type(),
+            index.Type(),
+        )
+    }
+}
+
+func evalListIndexExpression(list, index object.Object) object.Object {
+    arr := list.(*object.List).Arr
+    idx := index.(*object.Integer).Value
+
+    if idx < 0 || idx > int64(len(arr) - 1) {
+        return NULL
+    }
+
+    return arr[idx]
 }
 
 func checkCondition(obj object.Object) bool {

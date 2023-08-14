@@ -14,6 +14,7 @@ const (
 
     NAME = "NAME"
     INT = "INT"
+    FLOAT = "FLOAT"
     STRING = "STRING"
 
     ASSIGN = "="
@@ -44,6 +45,8 @@ const (
 
     LPAR = "("
     RPAR = ")"
+    LBR = "["
+    RBR = "]"
     LSQB = "{"
     RSQB = "}"
 

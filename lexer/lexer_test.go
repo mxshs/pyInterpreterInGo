@@ -31,13 +31,15 @@ func TestTokens(t *testing.T) {
         c = a / b
         c = !a
         c = a ** 2
+        print(c < a)
+        print(b > a)
         print(c != a)
         print(c == a)
         d = {hey: world}
         if a:
             print(a)
         else:
-            print(wtf)
+            print("wtf")
         a = true
         b = false
         
@@ -48,7 +50,10 @@ func TestTokens(t *testing.T) {
 
     c = add(a, b)
 
-    print(c)`
+    print(c)
+
+    lst = [1, 2, "3"]
+    `
 
     tests := []struct {
         expectedType token.TokenType
@@ -151,6 +156,20 @@ func TestTokens(t *testing.T) {
         {token.NAME, "a"},
         {token.DOUBLE_STAR, "**"},
         {token.INT, "2"},
+        
+        {token.NAME, "print"},
+        {token.LPAR, "("},
+        {token.NAME, "c"},
+        {token.LT, "<"},
+        {token.NAME, "a"},
+        {token.RPAR, ")"}, 
+
+        {token.NAME, "print"},
+        {token.LPAR, "("},
+        {token.NAME, "b"},
+        {token.GT, ">"},
+        {token.NAME, "a"},
+        {token.RPAR, ")"}, 
 
         {token.NAME, "print"},
         {token.LPAR, "("},
@@ -186,7 +205,7 @@ func TestTokens(t *testing.T) {
         {token.COLON, ":"},
         {token.NAME, "print"},
         {token.LPAR, "("},
-        {token.NAME, "wtf"},
+        {token.STRING, "wtf"},
         {token.RPAR, ")"},
 
         {token.NAME, "a"},
@@ -224,6 +243,18 @@ func TestTokens(t *testing.T) {
         {token.LPAR, "("},
         {token.NAME, "c"},
         {token.RPAR, ")"},
+
+        {token.NAME, "lst"},
+        {token.ASSIGN, "="},
+        {token.LBR, "["},
+        {token.INT, "1"},
+        {token.COMMA, ","},
+        {token.INT, "2"},
+        {token.COMMA, ","},
+        {token.STRING, "3"},
+        {token.RBR, "]"},
+        // {token.EOF, "EOF"},
+        // {token.NEWL, "\n"},
     }
 
     l := GetLexer(input)
