@@ -1,7 +1,7 @@
 package eval
 
 import (
-	"fmt"
+    "fmt"
 	"mxshs/pyinterpreter/ast"
 	"mxshs/pyinterpreter/object"
 )
@@ -173,10 +173,14 @@ func evalBangOperatorExpression(operand object.Object) object.Object {
 }
 
 func evalMinusPrefixOperatorExpression(operand object.Object) object.Object {
-    if operand.Type() != object.INTEGER_OBJ {
+    if !IsNumeric(operand){
         return newError("unknown operator - for type %s",
             operand.Type(),
         )
+    }
+
+    if operand.Type() == object.FLOAT_OBJ {
+        return &object.Float{Value: -operand.(*object.Float).Value}
     }
 
     return &object.Integer{Value: -operand.(*object.Integer).Value}
@@ -185,8 +189,32 @@ func evalMinusPrefixOperatorExpression(operand object.Object) object.Object {
 func evalInfixExpression(
     op string, left, right object.Object) object.Object {
     switch {
-    case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
-        return evalIntegerInfixExpression(op, left, right)
+    case IsNumeric(left) && IsNumeric(right):
+        if left.Type() == object.FLOAT_OBJ {
+            if right.Type() == object.FLOAT_OBJ {
+                return evalFloatInfixExpression(op, left, right)
+            }
+
+            return evalFloatInfixExpression(
+                op,
+                left,
+                &object.Float{
+                    Value: float64(right.(*object.Integer).Value),
+                },
+            )
+        } else {
+            if right.Type() == object.INTEGER_OBJ {
+                return evalIntegerInfixExpression(op, left, right)
+            }
+
+            return evalFloatInfixExpression(
+                op,
+                &object.Float{
+                    Value: float64(left.(*object.Integer).Value),
+                },
+                right,
+            )
+        }
     case left.Type() == object.BOOL_OBJ || right.Type() == object.BOOL_OBJ:
         return evalBoolInfixExpression(op, left, right)
     case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
@@ -221,7 +249,68 @@ func evalIntegerInfixExpression(
         case "/":
             return &object.Integer{Value: leftVal / rightVal}
         case "**":
-            return &object.Integer{Value: pow(leftVal, rightVal).(int64)}
+            return &object.Integer{Value: pow(leftVal, rightVal)}
+        case "<":
+            if leftVal < rightVal {
+                return TRUE
+            } else {
+                return FALSE
+            }
+        case ">":
+            if leftVal > rightVal {
+                return TRUE
+            } else {
+                return FALSE
+            }
+        case "<=":
+            if leftVal <= rightVal {
+                return TRUE
+            } else {
+                return FALSE
+            }
+        case ">=":
+            if leftVal >= rightVal {
+                return TRUE
+            } else {
+                return FALSE
+            }
+        case "==":
+            if leftVal == rightVal {
+                return TRUE
+            } else {
+                return FALSE
+            }
+        case "!=":
+            if leftVal == rightVal {
+                return FALSE
+            } else {
+                return TRUE
+            }
+        default:
+            return newError("unknown operator %s for types %s and %s",
+                op,
+                left.Type(),
+                right.Type(),
+            )
+        }
+}
+
+func evalFloatInfixExpression(
+    op string, left, right object.Object) object.Object {
+    leftVal := left.(*object.Float).Value
+    rightVal := right.(*object.Float).Value
+
+    switch op {
+        case "+":
+            return &object.Float{Value: leftVal + rightVal}
+        case "-": 
+            return &object.Float{Value: leftVal - rightVal}
+        case "*":
+            return &object.Float{Value: leftVal * rightVal}
+        case "/":
+            return &object.Float{Value: leftVal / rightVal}
+        case "**":
+            return &object.Float{Value: powFloat(leftVal, rightVal)} 
         case "<":
             if leftVal < rightVal {
                 return TRUE

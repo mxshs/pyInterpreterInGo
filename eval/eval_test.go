@@ -42,6 +42,40 @@ func testIntegerObject(t *testing.T, obj object.Object, exp int64) bool {
     return true
 }
 
+func TestEvalFloat(t *testing.T) {
+    tests := []struct {
+        input string
+        expected float64
+    } {
+        {"6.9", 6.9},
+        {"42.0", 42.0},
+        {"-6.9", -6.9},
+        {"-42.0", -42.0},
+    }
+
+    for _, tt := range tests {
+        evaluated := testEval(tt.input)
+        testFloatObject(t, evaluated, tt.expected)
+    }
+}
+
+func testFloatObject(t *testing.T, obj object.Object, exp float64) bool {
+    result, ok := obj.(*object.Float)
+    if !ok {
+        t.Errorf("Expected object type: %s, got: %T (%+v)", object.FLOAT_OBJ,
+            obj, obj)
+        return false
+    }
+
+    if result.Value != exp {
+        t.Errorf("Expected object integer value: %f, got: %f",
+            exp, result.Value)
+        return false
+    }
+
+    return true
+}
+
 func TestEvalBool(t *testing.T) {
     tests := []struct {
         input string
@@ -68,6 +102,45 @@ func testBoolObject(t *testing.T, obj object.Object, exp bool) bool {
     if result.Value != exp {
         t.Errorf("Expected object boolean value: %t, got: %t",
             exp, result.Value)
+        return false
+    }
+
+    return true
+}
+
+func TestEvalString(t *testing.T) {
+    tests := []struct {
+        input string
+        expected string
+    } {
+        {"\"69420\"", "69420",},
+    }
+
+    for _, tt := range tests {
+        evaluated := testEval(tt.input)
+        testStringObject(t, evaluated, tt.expected)
+    }
+}
+
+func testStringObject(t *testing.T, obj object.Object, exp string) bool {
+    result, ok := obj.(*object.String)
+    if !ok {
+        t.Errorf(
+            "expected object type: %s, got: %T",
+            object.STRING_OBJ,
+            obj,
+        )
+
+        return false
+    }
+
+    if result.Value != exp {
+        t.Errorf(
+            "expected string value to be: %s, got: %s",
+            exp,
+            result.Value,
+        )
+
         return false
     }
 
@@ -168,13 +241,17 @@ func TestFunctionDef(t *testing.T) {
         body string
     } {
         {
-            "def sum(a, b): (return a + b)",
+            "def c(a, b): (return a + b) \n c",
             []string{"a", "b"},
             "return (a + b)"},
     }
 
     for _, tt := range tests {
         evaluated := testEval(tt.input)
+
+        if isError(evaluated) {
+            t.Errorf(evaluated.(*object.Error).Message)
+        }
 
         function, ok := evaluated.(*object.Function)
         if !ok {
@@ -202,12 +279,134 @@ func TestFunctions(t *testing.T) {
         input string
         expected int64
     }{
-        {"def sum(a, b): return (a + b) \n sum(3, 5)", 8},
+        {"def c(a, b): (return a + b) \n c(3, 5)", 8},
     }
 
     for _, tt := range tests {
         testIntegerObject(t, testEval(tt.input), tt.expected)
     }
+}
+
+func TestBltins(t *testing.T) {
+    tests := []struct {
+        input string
+        expected string
+    } {
+        {"len([1, 2.0, \"3\"])", "3"},
+    }
+
+    for _, tt := range tests {
+        evaluated := testEval(tt.input)
+
+        if isError(evaluated) {
+            t.Errorf(
+                "unexpected Error during evaluation: %s",
+                evaluated.(*object.Error).Message,
+            )
+        }
+
+        if val := evaluated.Inspect(); val != tt.expected {
+            t.Errorf(
+                "expected result of infix expression to be: %s, got: %s",
+                tt.expected,
+                val,
+            )
+        }
+    }
+}
+
+func TestInfixExpressions(t *testing.T) {
+    tests := []struct {
+        input string
+        expected string
+    } {
+        {"69 + 420\n", "489"},
+        {"69 - 420\n", "-351"},
+        {"69 * 420\n", "28980"},
+        {"5 / 2\n", "2"},
+        {"2 ** 6\n", "64"},
+        {"6.9 + 0.42\n", "7.32"},
+        {"6.9 - 0.42\n", "6.48"},
+        {"5.5 / 2\n", "2.75"},
+        {"5.5 * 2\n", "11"},
+        {"\"hello\" + \"world\"", "helloworld"},
+    }
+
+    for _, tt := range tests {
+        evaluated := testEval(tt.input)
+
+        if isError(evaluated) {
+            t.Errorf(
+                "unexpected Error during evaluation: %s",
+                evaluated.(*object.Error).Message,
+            )
+        }
+
+        if val := evaluated.Inspect(); val != tt.expected {
+            t.Errorf(
+                "expected result of infix expression to be: %s, got :%s",
+                tt.expected,
+                val,
+            )
+        }
+    }
+}
+
+func TestLists(t *testing.T) {
+    tests := []struct {
+        input string
+        expectedTypes []string
+        expectedValues []string
+    } {
+        {
+            "[69, 4.20, \"3\"]",
+            []string{object.INTEGER_OBJ, object.FLOAT_OBJ, object.STRING_OBJ},
+            []string{"69", "4.2", "3"},
+        },
+    }
+
+    for _, tt := range tests {
+        testListObject(t, testEval(tt.input), tt.expectedTypes, tt.expectedValues)
+    }
+}
+
+func testListObject(t *testing.T, obj object.Object, expTypes, expValues []string) bool {
+    list, ok := obj.(*object.List)
+    if !ok {
+        t.Errorf(
+            "expected object type: %s, got: %T (%+v)",
+            object.LIST,
+            obj,
+            obj,
+        )
+
+        return false
+    }
+
+    for idx, val := range list.Arr {
+        if string(val.Type()) != expTypes[idx] {
+            t.Errorf(
+                "expected %d element to be of type: %s, got: %T (%+v)",
+                idx,
+                expTypes[idx],
+                val,
+                val,
+            )
+        }
+        
+        if val.Inspect() != expValues[idx] {
+            t.Errorf(
+                "Expected %d element to be: %s, got: %s",
+                idx,
+                expValues[idx],
+                val.Inspect(),
+            )
+
+            return false
+        }
+    }
+
+    return true
 }
 
 func testEval(inp string) object.Object {

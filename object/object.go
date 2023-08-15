@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"mxshs/pyinterpreter/ast"
+	"strconv"
 	"strings"
 )
 
@@ -48,7 +49,7 @@ func (f *Float) Type() ObjectType {
 }
 
 func (f *Float) Inspect() string {
-    return fmt.Sprintf("%f", f.Value)
+    return strconv.FormatFloat(f.Value, 'f', -1, 64)
 }
 
 type Boolean struct {
@@ -171,3 +172,4 @@ func (l *List) Inspect() string {
 
     return out.String()
 }
+
