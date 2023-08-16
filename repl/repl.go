@@ -5,16 +5,24 @@ import (
 	"fmt"
 	"io"
 
-	//"reflect"
-
 	"mxshs/pyinterpreter/eval"
 	"mxshs/pyinterpreter/lexer"
 	"mxshs/pyinterpreter/object"
 	"mxshs/pyinterpreter/parser"
-	//"mxshs/pyinterpreter/token"
 )
 
 const PROMPT = "eval is not stable yet >> "
+
+//const test = `def p(b, c):
+//    if (b > c):
+//        def g(i, e):
+//            return i + e
+//       return g(b, c)
+//    else:
+//        def g(i, e):
+//            return i * e
+//       return g(b, c)
+//p(3,5)`
 
 func StartREPL(in io.Reader, out io.Writer) {
     scanner := bufio.NewScanner(in)
@@ -27,7 +35,7 @@ func StartREPL(in io.Reader, out io.Writer) {
         if !scanned {
             break
         }
-
+    
         line := scanner.Text()
         l := lexer.GetLexer(line)
         
@@ -47,9 +55,6 @@ func StartREPL(in io.Reader, out io.Writer) {
             io.WriteString(out, evaluated.Inspect())
             io.WriteString(out, "\n")
         }
-//        for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-//            fmt.Printf("%+v\n", tok)
-//        }
     }
 }
 

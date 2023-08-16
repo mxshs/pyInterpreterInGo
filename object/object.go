@@ -164,11 +164,13 @@ func (l *List) Inspect() string {
 
     out.WriteString("list([")
 
-    for _, elem := range l.Arr[:len(l.Arr) - 1] {
-        out.WriteString(elem.Inspect() + ", ")
+    elems := []string{}
+
+    for _, elem := range l.Arr {
+        elems = append(elems, elem.Inspect())
     }
 
-    out.WriteString(l.Arr[len(l.Arr) - 1].Inspect() + "])")
+    out.WriteString(strings.Join(elems, ", ") + "])")
 
     return out.String()
 }

@@ -10,6 +10,7 @@ type Lexer struct {
     position int
     readPosition int
     ch byte
+    depth int
     inputSize int
 }
 
@@ -35,6 +36,15 @@ func (l *Lexer) NextToken() token.Token {
     l.omitSymbol()
 
     switch l.ch {
+    case '\n':
+        depth := 0
+        for l.peekChar() == ' ' {
+            depth += 1
+            l.nextChar()
+        }
+        fmt.Println(depth)
+        l.depth = depth
+        tok = newToken(token.NEWL, l.ch)
     case '=':
         if l.peekChar() == '=' {
             ch := l.ch
@@ -124,8 +134,6 @@ func (l *Lexer) NextToken() token.Token {
     case '"':
         tok.Type = token.STRING
         tok.Literal = l.readString()
-    case '\n':
-        tok = newToken(token.NEWL, l.ch)
     case 0:
         tok.Literal = ""
         tok.Type = token.EOF
@@ -133,6 +141,7 @@ func (l *Lexer) NextToken() token.Token {
         if isLetter(l.ch) {
             tok.Literal = l.readIdent()
             tok.Type = token.LookupKey(tok.Literal)
+
             return tok
         } else if isDigit(l.ch) {
             literal, flag := l.readNumber()
@@ -142,6 +151,7 @@ func (l *Lexer) NextToken() token.Token {
             } else {
                 tok.Type = token.INT
             }
+            
             return tok
         } else {
             panic(
@@ -215,7 +225,7 @@ func isDigit(ch byte) bool {
 }
 
 func (l *Lexer) omitSymbol() {
-    for l.ch == ' ' || l.ch == '\t' || l.ch == '\r' || l.ch == '\n' {
+    for l.ch == ' ' {//|| l.ch == '\r' {
         l.nextChar()
     }
 }
@@ -226,5 +236,9 @@ func (l *Lexer) peekChar() byte {
     } else {
         return l.input[l.readPosition]
     }
+}
+
+func (l *Lexer) GetDepth() int {
+    return l.depth
 }
 

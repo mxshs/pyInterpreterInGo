@@ -11,6 +11,7 @@ import (
 
 func main() {
 //    parser.Run()
+    repl.Read()
     user, err := user.Current()
     if err != nil {
         panic(err)

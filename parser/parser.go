@@ -48,6 +48,7 @@ type Parser struct {
 
     curToken token.Token
     peekToken token.Token
+    Depth int
     errors []string
 
     prefixParsers map[token.TokenType]prefixParse
@@ -64,6 +65,9 @@ func GetParser(l *lexer.Lexer) *Parser {
         l: l,
         errors: []string{},
     }
+
+    p.curToken = p.l.NextToken()
+    p.peekToken = p.l.NextToken()
 
     p.prefixParsers = make(map[token.TokenType]prefixParse)
     p.registerPrefix(token.NAME, p.parseName)
@@ -93,8 +97,8 @@ func GetParser(l *lexer.Lexer) *Parser {
     p.registerInfix(token.DOUBLE_STAR, p.parseInfixExpression)
     p.registerInfix(token.LBR, p.parseIndexExpression)
 
-    p.nextToken()
-    p.nextToken()
+    //p.nextToken()
+    //p.nextToken()
 
     return p
 }
@@ -114,6 +118,7 @@ func (p *Parser) peekError(t token.TokenType) {
 
 func (p *Parser) nextToken() {
     p.curToken = p.peekToken
+    p.Depth = p.l.GetDepth()
     p.peekToken = p.l.NextToken()
 }
 
@@ -200,7 +205,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 func (p *Parser) addNoPrefixParseError(t token.TokenType) {
-    msg := fmt.Sprintf("prefix parse function not found for type %s", t)
+    msg := fmt.Sprintf("prefix parse function not found for type %s %s", t, p.peekToken.Literal)
     p.errors = append(p.errors, msg)
 }
 
@@ -213,6 +218,7 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 
     value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
     if err != nil {
+
         msg := fmt.Sprintf(
             "error during parsing %q as integer",
             p.curToken.Literal,
@@ -301,6 +307,7 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
     exp := p.parseExpression(LOWEST)
 
     if !p.expectPeek(token.RPAR) {
+        //fmt.Printf("wanted %s, got %s and %s", token.RPAR, p.curToken.Literal, p.peekToken.Literal)
         return nil
     }
 
@@ -328,25 +335,27 @@ func (p *Parser) parseIfExpression() ast.Expression {
     if !p.expectPeek(token.COLON) {
         return nil
     }
-    if !p.expectPeek(token.LPAR) {
-        return nil
+    if p.peekTokenIs(token.NEWL) {
+        expression.Consequence = p.parseBlockStatement()
+    } else {
+        expression.Consequence = p.parseInlineStatement()
     }
 
-    expression.Consequence = p.parseBlockStatement()
+    fmt.Println(p.curToken)
 
-    if p.peekTokenIs(token.ELSE) {
-        p.nextToken()
-
+    if p.curToken.Type == token.ELSE {
         if !p.expectPeek(token.COLON) {
             return nil
         }
 
-        if !p.expectPeek(token.LPAR) {
-            return nil
+        if p.peekTokenIs(token.NEWL) {
+            expression.Alternative = p.parseBlockStatement()
+        } else {
+            expression.Alternative = p.parseInlineStatement()
         }
-
-        expression.Alternative = p.parseBlockStatement()
     }
+
+    p.nextToken()
 
     return expression
 }
@@ -355,8 +364,10 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
     block := &ast.BlockStatement{Token: p.curToken}
     block.Statements = []ast.Statement{}
     p.nextToken()
+    currDepth := p.Depth
+    p.nextToken()
 
-    for !p.tokenIs(token.RPAR) && !p.tokenIs(token.EOF) {
+    for !p.tokenIs(token.EOF) && p.l.GetDepth() >= currDepth {
         statement := p.parseStatement()
         if statement != nil {
             block.Statements = append(block.Statements, statement)
@@ -364,8 +375,24 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 
         p.nextToken()
     }
-
+    
     return block
+}
+
+func (p *Parser) parseInlineStatement() *ast.BlockStatement {
+    inline := &ast.BlockStatement{Token: p.curToken}
+    inline.Statements = []ast.Statement{}
+
+    for !p.tokenIs(token.EOF) && !p.tokenIs(token.NEWL) {
+        statement := p.parseStatement()
+        if statement != nil {
+            inline.Statements = append(inline.Statements, statement)
+        }
+
+        p.nextToken()
+    }
+
+    return inline
 }
 
 func (p *Parser) parseFunctionStatement() *ast.FunctionStatement {
@@ -387,11 +414,16 @@ func (p *Parser) parseFunctionStatement() *ast.FunctionStatement {
         return nil
     }
 
-    if !p.expectPeek(token.LPAR) {
-        return nil
+    if !p.peekTokenIs(token.NEWL) {
+        p.nextToken()
+        statement.Body = p.parseInlineStatement()
+    } else {
+        statement.Body = p.parseBlockStatement()
     }
 
-    statement.Body = p.parseBlockStatement()
+    if p.curToken.Type == token.NEWL {
+        p.nextToken()
+    }
 
     return statement
 }
