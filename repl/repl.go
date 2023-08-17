@@ -2,8 +2,8 @@ package repl
 
 import (
 	"bufio"
-	"fmt"
 	"io"
+	"strings"
 
 	"mxshs/pyinterpreter/eval"
 	"mxshs/pyinterpreter/lexer"
@@ -11,7 +11,7 @@ import (
 	"mxshs/pyinterpreter/parser"
 )
 
-const PROMPT = "eval is not stable yet >> "
+const PROMPT = ">> "
 
 //const test = `def p(b, c):
 //    if (b > c):
@@ -29,16 +29,11 @@ func StartREPL(in io.Reader, out io.Writer) {
     env := object.NewEnv()
 
     for {
-        fmt.Print(PROMPT)
 
-        scanned := scanner.Scan()
-        if !scanned {
-            break
-        }
-    
-        line := scanner.Text()
-        l := lexer.GetLexer(line)
-        
+        res := read(scanner, out)
+
+        l := lexer.GetLexer(res)
+
         p := parser.GetParser(l)
         program := p.ParseProgram()
 
@@ -54,6 +49,36 @@ func StartREPL(in io.Reader, out io.Writer) {
         if evaluated != nil {
             io.WriteString(out, evaluated.Inspect())
             io.WriteString(out, "\n")
+        }
+    }
+}
+
+func read(scanner *bufio.Scanner, out io.Writer) string {
+    var block []string
+    var indent int
+    
+    indentstr := " "
+
+    for {
+        io.WriteString(out, ">>" + indentstr)
+        scanner.Scan()
+
+        line := scanner.Text()
+
+        if len(line) == 0 {
+            if indent == 0 {
+                return strings.Join(block, "\n")
+            } else {
+                indent -= 4
+                indentstr = strings.Repeat(" ", indent + 1)
+                continue
+            }
+        }
+
+        block = append(block, strings.Repeat(" ", indent) + line)
+        if line[len(line) - 1] == 58 {
+            indent += 4
+            indentstr = strings.Repeat(" ", indent + 1)
         }
     }
 }

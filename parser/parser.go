@@ -199,6 +199,10 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
         p.nextToken()
 
         leftExp = infix(leftExp)
+
+        if p.curToken.Type == token.EOF {
+            break
+        }
     }
 
     return leftExp
@@ -341,8 +345,6 @@ func (p *Parser) parseIfExpression() ast.Expression {
         expression.Consequence = p.parseInlineStatement()
     }
 
-    fmt.Println(p.curToken)
-
     if p.curToken.Type == token.ELSE {
         if !p.expectPeek(token.COLON) {
             return nil
@@ -365,17 +367,20 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
     block.Statements = []ast.Statement{}
     p.nextToken()
     currDepth := p.Depth
-    p.nextToken()
 
-    for !p.tokenIs(token.EOF) && p.l.GetDepth() >= currDepth {
+    for !p.tokenIs(token.EOF) && p.Depth >= currDepth {
         statement := p.parseStatement()
         if statement != nil {
             block.Statements = append(block.Statements, statement)
         }
 
+        //if p.curToken.Type == token.NEWL && p.Depth < currDepth {
+          //  break
+        //}
         p.nextToken()
     }
-    
+
+  
     return block
 }
 
@@ -418,11 +423,8 @@ func (p *Parser) parseFunctionStatement() *ast.FunctionStatement {
         p.nextToken()
         statement.Body = p.parseInlineStatement()
     } else {
-        statement.Body = p.parseBlockStatement()
-    }
-
-    if p.curToken.Type == token.NEWL {
         p.nextToken()
+        statement.Body = p.parseBlockStatement()
     }
 
     return statement
@@ -458,6 +460,10 @@ func (p *Parser) parseFunctionArguments() []*ast.Name {
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
     call := &ast.CallExpression{Token: p.curToken, Function: function}
     call.Arguments = p.parseCallArguments()
+
+    if p.peekToken.Type == token.NEWL {
+        p.nextToken()
+    }
 
     return call
 }

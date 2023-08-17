@@ -38,11 +38,10 @@ func (l *Lexer) NextToken() token.Token {
     switch l.ch {
     case '\n':
         depth := 0
-        for l.peekChar() == ' ' {
+        for l.peekChar() == ' ' || l.peekChar() == '\t' {
             depth += 1
             l.nextChar()
         }
-        fmt.Println(depth)
         l.depth = depth
         tok = newToken(token.NEWL, l.ch)
     case '=':
