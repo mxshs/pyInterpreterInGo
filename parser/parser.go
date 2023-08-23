@@ -321,9 +321,9 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 func (p *Parser) parseIfExpression() ast.Expression {
     expression := &ast.IfExpression{Token: p.curToken}
     
-    if !p.expectPeek(token.LPAR) {
-        return nil
-    }
+    //if !p.expectPeek(token.LPAR) {
+      //  return nil
+    //}
 
     p.nextToken()
 
@@ -333,31 +333,36 @@ func (p *Parser) parseIfExpression() ast.Expression {
       //  return nil
     //}
 
-    if !p.expectPeek(token.RPAR) {
+    //if !p.expectPeek(token.RPAR) {
+      //  return nil
+    //}
+    if p.curToken.Type != token.COLON && !p.expectPeek(token.COLON) {
         return nil
     }
-    if !p.expectPeek(token.COLON) {
-        return nil
-    }
+
+    fmt.Println(p.curToken, p.peekToken)
+
     if p.peekTokenIs(token.NEWL) {
+        p.nextToken()
         expression.Consequence = p.parseBlockStatement()
     } else {
         expression.Consequence = p.parseInlineStatement()
     }
 
+//    p.nextToken()
+
     if p.curToken.Type == token.ELSE {
-        if !p.expectPeek(token.COLON) {
+        if p.curToken.Type != token.COLON && !p.expectPeek(token.COLON) {
             return nil
         }
 
         if p.peekTokenIs(token.NEWL) {
+            p.nextToken()
             expression.Alternative = p.parseBlockStatement()
         } else {
             expression.Alternative = p.parseInlineStatement()
         }
     }
-
-    p.nextToken()
 
     return expression
 }
@@ -378,6 +383,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
           //  break
         //}
         p.nextToken()
+        fmt.Println(p.curToken)
     }
 
   
@@ -419,12 +425,12 @@ func (p *Parser) parseFunctionStatement() *ast.FunctionStatement {
         return nil
     }
 
-    if !p.peekTokenIs(token.NEWL) {
-        p.nextToken()
-        statement.Body = p.parseInlineStatement()
-    } else {
-        p.nextToken()
+    p.nextToken()
+    
+    if p.tokenIs(token.NEWL) {
         statement.Body = p.parseBlockStatement()
+    } else {
+        statement.Body = p.parseInlineStatement()
     }
 
     return statement
