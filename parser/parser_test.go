@@ -90,10 +90,8 @@ func TestInfixExpressions(t * testing.T) {
 }
 
 func TestFunctionStatements(t *testing.T) {
-    input := `
-    def a(b, c): (
+    input := `def a(b, c):
         return a + b
-    )
     `
 
     l := lexer.GetLexer(input)
@@ -141,9 +139,7 @@ func TestFunctionStatements(t *testing.T) {
 }
 
 func TestCallExpression(t *testing.T) {
-    input := `
-    a(3, 5)
-    `
+    input := `a(3, 5)`
 
     l := lexer.GetLexer(input)
     p := GetParser(l)

@@ -163,7 +163,7 @@ func (l *Lexer) NextToken() token.Token {
     }
 
     l.nextChar()
-
+    fmt.Println(tok)
     return tok
 }
 

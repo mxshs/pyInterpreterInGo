@@ -340,24 +340,24 @@ func (p *Parser) parseIfExpression() ast.Expression {
         return nil
     }
 
-    fmt.Println(p.curToken, p.peekToken)
+    p.nextToken()
 
-    if p.peekTokenIs(token.NEWL) {
-        p.nextToken()
+    if p.tokenIs(token.NEWL) {
         expression.Consequence = p.parseBlockStatement()
     } else {
         expression.Consequence = p.parseInlineStatement()
     }
 
-//    p.nextToken()
+    p.nextToken()
 
     if p.curToken.Type == token.ELSE {
         if p.curToken.Type != token.COLON && !p.expectPeek(token.COLON) {
             return nil
         }
 
-        if p.peekTokenIs(token.NEWL) {
-            p.nextToken()
+        p.nextToken()
+
+        if p.tokenIs(token.NEWL) {
             expression.Alternative = p.parseBlockStatement()
         } else {
             expression.Alternative = p.parseInlineStatement()
@@ -379,11 +379,16 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
             block.Statements = append(block.Statements, statement)
         }
 
-        //if p.curToken.Type == token.NEWL && p.Depth < currDepth {
-          //  break
-        //}
+        // TODO: Redo handling of blocks
+        // Currently this thing breaks out of the loop if next token is in
+        // outer scope. However, this is bad because I can just track the 
+        // depth of the next token initially, without having to introduce
+        // branching here.
+        if p.l.GetDepth() < currDepth {
+            break
+        }
+    
         p.nextToken()
-        fmt.Println(p.curToken)
     }
 
   
@@ -398,6 +403,14 @@ func (p *Parser) parseInlineStatement() *ast.BlockStatement {
         statement := p.parseStatement()
         if statement != nil {
             inline.Statements = append(inline.Statements, statement)
+        }
+
+        // TODO: Redo handling of inline clauses
+        // I should think about how to do this, probably just remove the loop
+        // completely, or introduce some bracket syntax/semicolons and track
+        // them
+        if p.tokenIs(token.NEWL) {
+            break
         }
 
         p.nextToken()

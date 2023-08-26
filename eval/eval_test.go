@@ -171,14 +171,14 @@ func TestIfStatements(t *testing.T) {
         input string
         expected interface{}
     } {
-        {"if (true): (69)", 69},
-        {"if (false): (420)", nil},
-        {"if (true): (69) else: (420)", 69},
-        {"if (false): (69) else: (420)", 420},
-        {"if (1 < 2): (69)", 69},
-        {"if (1 > 2): (420)", nil}, 
-        {"if (1 < 2): (69) else: (420)", 69},
-        {"if (1 > 2): (69) else: (420)", 420},
+        {"if true: \n\t 69", 69},
+        {"if false: 420", nil},
+        {"if true: \n\t 69 \n else: 420", 69},
+        {"if false: 69 \n else: \n\t 420", 420},
+        {"if 1 < 2: \n\t 69", 69},
+        {"if 1 > 2: 420", nil}, 
+        {"if 1 < 2: \n\t 69 \n else: 420", 69},
+        {"if 1 > 2: 69 \n else: \n\t 420", 420},
     }
 
     for _, tt := range tests {
@@ -198,7 +198,7 @@ func TestReturnStatement(t *testing.T) {
         expected int64
     } {
         {"return 69", 69},
-        {"return 420 \n 420", 420},
+        {"return 420 \n 69", 420},
         {"return 69 * 420 \n 1337", 28980},
     }
 
@@ -241,7 +241,7 @@ func TestFunctionDef(t *testing.T) {
         body string
     } {
         {
-            "def c(a, b): (return a + b) \n c",
+            "def c(a, b):\n\treturn a + b\nc",
             []string{"a", "b"},
             "return (a + b)"},
     }
@@ -279,7 +279,7 @@ func TestFunctions(t *testing.T) {
         input string
         expected int64
     }{
-        {"def c(a, b): (return a + b) \n c(3, 5)", 8},
+        {"def c(a, b): \n\t return a + b \n c(3, 5)", 8},
     }
 
     for _, tt := range tests {

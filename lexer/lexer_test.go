@@ -7,8 +7,7 @@ import (
 )
 
 func TestTokens(t *testing.T) {
-    input := `
-    a = 35
+    input := `a = 35
     b = 5
 
     def add(a, b):
@@ -261,6 +260,10 @@ func TestTokens(t *testing.T) {
 
     for i, tt := range tests {
         tok := l.NextToken()
+
+        for tok.Type == token.NEWL {
+            tok = l.NextToken()
+        }
 
         if tok.Type != tt.expectedType {
             t.Fatalf("tests[%d] - wrong token type: expected %q, got %q",
