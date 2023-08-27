@@ -169,7 +169,7 @@ func TestBangOperator(t * testing.T) {
 func TestIfStatements(t *testing.T) {
     tests := []struct {
         input string
-        expected interface{}
+        expected any
     } {
         {"if true: \n\t 69", 69},
         {"if false: 420", nil},
@@ -293,6 +293,9 @@ func TestBltins(t *testing.T) {
         expected string
     } {
         {"len([1, 2.0, \"3\"])", "3"},
+        {"len(\"hello world!\")", "12"},
+        {"sum([1, 2, 3])", "6"},
+        {"sum([1, 2.5, 3])", "6.5"},
     }
 
     for _, tt := range tests {
@@ -328,8 +331,10 @@ func TestInfixExpressions(t *testing.T) {
         {"6.9 + 0.42\n", "7.32"},
         {"6.9 - 0.42\n", "6.48"},
         {"5.5 / 2\n", "2.75"},
-        {"5.5 * 2\n", "11"},
+        {"5 * 2.2\n", "11"},
         {"\"hello\" + \"world\"", "helloworld"},
+        {"true == true", "true"},
+        {"false == true", "false"},
     }
 
     for _, tt := range tests {
@@ -407,6 +412,49 @@ func testListObject(t *testing.T, obj object.Object, expTypes, expValues []strin
     }
 
     return true
+}
+
+func TestIndexExpression(t *testing.T) {
+    tests := []struct{
+        input string
+        expected string 
+    } {
+        {
+            "a = [69, 420, 0] \n a[0]",
+            "69",
+        },
+        {
+            "a = [69, 0, 420] \n a[2]",
+            "420",
+        },
+        {
+            "a = [1, 3, 3, 7] \n a[-1]",
+            "null",
+        },
+        {
+            "a = [1, 3, 3, 7] \n a[4]",
+            "null",
+        },
+    }
+
+    for _, tt := range tests {
+        evaluated := testEval(tt.input)
+
+        if isError(evaluated) {
+            t.Errorf(
+                "unexpected Error during evaluation: %s",
+                evaluated.(*object.Error).Message,
+            )
+        }
+
+        if evaluated.Inspect() != tt.expected {
+            t.Errorf(
+                "expected %s at index, got %s",
+                tt.expected,
+                evaluated.Inspect(),
+            )
+        }
+    }
 }
 
 func testEval(inp string) object.Object {

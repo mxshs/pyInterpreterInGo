@@ -1,7 +1,6 @@
 package eval
 
 import (
-//	"fmt"
 	"mxshs/pyinterpreter/object"
 )
 
@@ -40,14 +39,17 @@ func pyLen(args ...object.Object) object.Object {
 }
 
 func pySum(args ...object.Object) object.Object {
-    switch args[0].Type() {
+    switch {
     default:
-    //case object.INTEGER_OBJ:
         var s1 *float64
         var s2 *int64
         temp := int64(0)
         s2 = &temp
-        // a := args[0].(*object.Integer).Value
+
+        if _, ok := args[0].(*object.List); ok {
+            args = args[0].(*object.List).Arr
+        }
+
         for _, obj := range args {
             if obj.Type() == object.INTEGER_OBJ {
                 if s1 != nil {
@@ -65,7 +67,9 @@ func pySum(args ...object.Object) object.Object {
         }
 
         if s1 != nil {
-            return &object.Float{Value: *s1}
+            return &object.Float{
+                Value: *s1,
+            }
         }
 
         return &object.Integer{
