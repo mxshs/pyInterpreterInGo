@@ -518,6 +518,10 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 func (p *Parser) parseListExpression() ast.Expression {
     p.nextToken()
 
+    if p.tokenIs(token.RBR) {
+        return &ast.ListLiteral{Arr: []ast.Expression{}}
+    }
+
     if p.peekTokenIs(token.COMMA) {
         arr := []ast.Expression{p.parseExpression(LOWEST)}
 
