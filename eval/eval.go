@@ -249,6 +249,14 @@ func evalIntegerInfixExpression(
         case "/":
             return &object.Integer{Value: leftVal / rightVal}
         case "**":
+            if rightVal < 0 {
+                return &object.Float{
+                    Value: powFloat(
+                        float64(leftVal),
+                        float64(rightVal),
+                    ),
+                }
+            }
             return &object.Integer{Value: pow(leftVal, rightVal)}
         case "<":
             if leftVal < rightVal {
